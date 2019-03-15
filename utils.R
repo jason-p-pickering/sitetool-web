@@ -82,7 +82,7 @@ validateSiteData <- function(d) {
 adornSiteData<-function(d) {
   
   
-  cached_mechs <- "/srv/shiny-server/apps/datapack/mechs.rds"
+  cached_mechs <- "/srv/shiny-server/apps/sitetool/mechs.rds"
   
   if (file.access(cached_mechs,4)) {
     
