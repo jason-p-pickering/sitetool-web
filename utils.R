@@ -84,7 +84,7 @@ adornSiteData<-function(d) {
   
   cached_mechs <- "/srv/shiny-server/apps/sitetool/mechs.rds"
   
-  if (file.access(cached_mechs,4)) {
+  if ( file.access(cached_mechs,4) == -1 ) {
     
     mechs <-readRDS(cached_mechs)
     
