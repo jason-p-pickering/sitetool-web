@@ -78,13 +78,31 @@ validateSiteData <- function(d) {
   
 }
 
+dataElementModalityMap<-function() {
+  
+   paste0(getOption("baseurl"),"api/dataElementGroupSets/Jm6OwL9IqEa?fields=dataElementGroups[name,dataElements[id]]") %>%
+    URLencode(.) %>%
+    httr::GET(.) %>%
+    httr::content(.,"text") %>%
+    jsonlite::fromJSON(.,flatten = TRUE) %>%
+    purrr::pluck(.,"dataElementGroups") %>% 
+    dplyr::mutate_if(is.list, purrr::simplify_all) %>% 
+    tidyr::unnest() %>%
+    dplyr::distinct() %>%
+    dplyr::select(dataElement = dataElements,
+                  hts_modality = name ) %>%
+    dplyr::mutate(hts_modality = stringr::str_remove(hts_modality,"FY19R/FY20T"))
+      
+
+}
+
 
 adornSiteData<-function(d) {
   
   
   cached_mechs <- "/srv/shiny-server/apps/sitetool/mechs.rds"
   
-  if ( file.access(cached_mechs,4) == -1 ) {
+  if ( file.access(cached_mechs,4) == 0 ) {
     
     mechs <-readRDS(cached_mechs)
     
@@ -105,7 +123,10 @@ adornSiteData<-function(d) {
                   psnu,
                   orgUnit=id)
   
+  modality_map<-dataElementModalityMap()
+  
   d$datim$site_data_pretty <- d$datim$site_data %>%
+    dplyr::left_join( modality_map, by = "dataElement") %>% 
     dplyr::mutate(
       dataElement = datimvalidation::remapDEs(dataElement,"id","shortName"),
       categoryOptionCombo = datimvalidation::remapCategoryOptionCombos(categoryOptionCombo,"id","shortName")
@@ -118,34 +139,47 @@ adornSiteData<-function(d) {
 }
   
 
-modalitySummaryChart <- function(df) {
+modalitySummaryChart <- function(d) {
 
-   df %>% 
-    dplyr::filter(!is.na(modality)) %>%
-    dplyr::group_by(modality, resultstatus) %>%
-    dplyr::summarise(value = sum(value)) %>%
+  
+  
+  age_order<-c(
+    "<1", 
+    "1-4",
+    "5-9" ,
+    "10-14",
+    "15-19",
+    "20-24",
+    "25-29",
+    "30-34",
+    "35-39",
+    "40-44",
+    "45-49",
+    "50+")
+  
+  foo<- d$datim$site_data_pretty %>% 
+    dplyr::filter(!is.na(hts_modality)) %>% 
+    dplyr::mutate(hts_sex = ifelse(stringr::str_detect(categoryOptionCombo,"Male"),"Male","Female")) %>% 
+    tidyr::separate(categoryOptionCombo,into=c("Age","Status","Sex"),sep=",") %>%
+    dplyr::mutate_if(is.character, stringr::str_trim) %>%
+    dplyr::group_by(hts_modality,hts_sex,Age) %>%
+    dplyr::summarise(value=sum(value)) %>%
     dplyr::ungroup() %>%
-    dplyr::arrange(modality, desc(resultstatus)) %>% 
-    dplyr::mutate(resultstatus = factor(resultstatus, c("Negative", "Positive"))) %>%
-    ggplot(aes(
-      y = value,
-      x = reorder(modality, value, sum),
-      fill = resultstatus
-    )) +
-    geom_col() +
-    scale_y_continuous(labels = scales::comma) +
-    coord_flip() +
+    dplyr::mutate(Age=factor(as.character(Age),levels=age_order))
+  
+  ggplot(foo, aes(x=Age,y=value, fill=hts_sex)) + 
+    geom_bar(stat="identity") + 
+    facet_wrap(~hts_modality) + 
+    theme() +
     scale_fill_manual(values = c("#548dc0", "#59BFB3")) +
     labs(y = "", x = "",
-         title = "COP19/FY20 Testing Targets",
-         subtitle = "modalities ordered by total tests") +
-    theme(legend.position = "bottom",
-          legend.title = element_blank(),
-          text = element_text(color = "#595959", size = 14),
-          plot.title = element_text(face = "bold"),
-          axis.ticks = element_blank(),
-          panel.background = element_blank(),
-          panel.grid.major.x = element_line(color = "#595959"),
-          panel.grid.minor.y = element_blank())
+         title = "COP19/FY20 Testing Targets") +
+    theme(
+      axis.text.x = element_text(angle = 90, hjust = 1),
+      legend.position = "bottom",
+      legend.title = element_blank(),
+      text = element_text(color = "#595959", size = 14),
+      plot.title = element_text(face = "bold"))
+  
 
 }
