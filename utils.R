@@ -92,13 +92,9 @@ dataElementModalityMap<-function() {
     dplyr::select(dataElement = dataElements,
                   hts_modality = name ) %>%
     dplyr::mutate(hts_modality = stringr::str_remove(hts_modality,"FY19R/FY20T"))
-      
-
 }
 
-
 adornSiteData<-function(d) {
-  
   
   cached_mechs <- "/srv/shiny-server/apps/sitetool/mechs.rds"
   
@@ -114,8 +110,6 @@ adornSiteData<-function(d) {
       readr::read_csv(col_names = TRUE) %>%
       dplyr::select(mechanismCode = "code", partner, agency, ou)
   }
-  
-
   
   site_list <- getSiteList(d$info$datapack_uid) %>%
     dplyr::select(site_name=name,
@@ -140,9 +134,6 @@ adornSiteData<-function(d) {
   
 
 modalitySummaryChart <- function(d) {
-
-  
-  
   age_order<-c(
     "<1", 
     "1-4",
@@ -168,7 +159,7 @@ modalitySummaryChart <- function(d) {
     dplyr::mutate(Age=factor(as.character(Age),levels=age_order))
   
   ggplot(foo, aes(x=Age,y=value, fill=hts_sex)) + 
-    geom_bar(stat="identity") + 
+    geom_bar(stat = "identity") + 
     facet_wrap(~hts_modality) + 
     theme() +
     scale_fill_manual(values = c("#548dc0", "#59BFB3")) +
@@ -181,5 +172,4 @@ modalitySummaryChart <- function(d) {
       text = element_text(color = "#595959", size = 14),
       plot.title = element_text(face = "bold"))
   
-
 }
