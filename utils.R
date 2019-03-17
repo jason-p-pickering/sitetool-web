@@ -80,6 +80,7 @@ validateSiteData <- function(d) {
 }
 
 adornMechanisms <- function(d) {
+  
   cached_mechs <- "/srv/shiny-server/apps/sitetool/mechs.rds"
   
   if ( file.access(cached_mechs,4) == 0 ) {
@@ -94,6 +95,8 @@ adornMechanisms <- function(d) {
       readr::read_csv(col_names = TRUE) %>%
       dplyr::select(mechanismCode = "code", partner, agency, ou)
   }
+  
+  if  ( !inherits(mechs,"data.frame") ) {stop("COULD NOT RETREIVE MECHANISM LIST")}
   
   d$datim$site_data_pretty <- d$datim$site_data %>%
     dplyr::left_join( mechs, by = c(  "attributeOptionCombo" = "mechanismCode" ))
