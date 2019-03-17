@@ -136,7 +136,9 @@ adornSites<-function(d) {
                   psnu,
                   orgUnit=id)
   
-  d$datim$site_data_pretty %<>% dplyr::left_join(site_list, by="orgUnit")
+  d$datim$site_data_pretty %<>% 
+    dplyr::left_join(site_list, by="orgUnit") %>%
+    dplyr::select(-orgUnit)
   
   d
   
