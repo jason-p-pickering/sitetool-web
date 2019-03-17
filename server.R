@@ -64,6 +64,7 @@ shinyServer(function(input, output, session) {
             type = "tabs",
             tabPanel("Messages",   tags$ul(uiOutput('messages'))),
             tabPanel("Indicator summary", dataTableOutput("indicator_summary")),
+            tabPanel("HTS Modality Summary", plotOutput("modality_summary")),
             tabPanel("Validation rules", dataTableOutput("vr_rules"))
           ))
         ))
@@ -152,6 +153,19 @@ shinyServer(function(input, output, session) {
     }
   })
   
+  output$modality_summary <- renderPlot({ 
+    
+    vr<-validation_results()
+    
+    if (!inherits(vr,"error") & !is.null(vr)){
+      
+        modalitySummaryChart(vr)
+      
+    } else {
+      NULL
+    }
+    
+  },height = 400,width = 600)
 
   output$vr_rules <- renderDataTable({ 
     
