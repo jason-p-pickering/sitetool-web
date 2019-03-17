@@ -79,25 +79,7 @@ validateSiteData <- function(d) {
   
 }
 
-dataElementModalityMap<-function() {
-  
-   paste0(getOption("baseurl"),"api/dataElementGroupSets/Jm6OwL9IqEa?fields=dataElementGroups[name,dataElements[id]]") %>%
-    URLencode(.) %>%
-    httr::GET(.) %>%
-    httr::content(.,"text") %>%
-    jsonlite::fromJSON(.,flatten = TRUE) %>%
-    purrr::pluck(.,"dataElementGroups") %>% 
-    dplyr::mutate_if(is.list, purrr::simplify_all) %>% 
-    tidyr::unnest() %>%
-    dplyr::distinct() %>%
-    dplyr::select(dataElement = dataElements,
-                  hts_modality = name ) %>%
-    dplyr::mutate(hts_modality = stringr::str_remove(hts_modality,"FY19R/FY20T"))
-}
-
-adornSiteData<-function(d) {
-  
-
+adornMechanisms <- function(d) {
   cached_mechs <- "/srv/shiny-server/apps/sitetool/mechs.rds"
   
   if ( file.access(cached_mechs,4) == 0 ) {
@@ -113,29 +95,65 @@ adornSiteData<-function(d) {
       dplyr::select(mechanismCode = "code", partner, agency, ou)
   }
   
+  d$datim$site_data_pretty <- d$datim$site_data %>%
+    dplyr::left_join( mechs, by = c(  "attributeOptionCombo" = "mechanismCode" ))
+  
+  d
+  
+  
+}
+
+adornDataElements<-function(d){
+  
+  modality_map <- paste0(getOption("baseurl"),"api/dataElementGroupSets/Jm6OwL9IqEa?fields=dataElementGroups[name,dataElements[id]]") %>%
+    URLencode(.) %>%
+    httr::GET(.) %>%
+    httr::content(.,"text") %>%
+    jsonlite::fromJSON(.,flatten = TRUE) %>%
+    purrr::pluck(.,"dataElementGroups") %>% 
+    dplyr::mutate_if(is.list, purrr::simplify_all) %>% 
+    tidyr::unnest() %>%
+    dplyr::distinct() %>%
+    dplyr::select(dataElement = dataElements,
+                  hts_modality = name ) %>%
+    dplyr::mutate(hts_modality = stringr::str_remove(hts_modality,"FY19R/FY20T"))
+    
+  d$datim$site_data_pretty %<>%  dplyr::left_join( modality_map, by = "dataElement")
+  
+  d
+  
+  
+}
+
+adornSites<-function(d) {
+  
   site_list <- getSiteList(d$info$datapack_uid) %>%
     dplyr::select(site_name=name,
                   site_type,
                   psnu,
                   orgUnit=id)
   
-  modality_map<-dataElementModalityMap()
+  d$datim$site_data_pretty %<>% dplyr::left_join(site_list, by="orgUnit")
   
-  d$datim$site_data_pretty <- d$datim$site_data %>%
-    dplyr::left_join( modality_map, by = "dataElement") %>% 
-    dplyr::mutate(
+  d
+  
+}
+
+adornMetdata<-function(d) {
+  
+  d$datim$site_data_pretty %<>%
+      dplyr::mutate(
       dataElement = datimvalidation::remapDEs(dataElement,"id","shortName"),
       categoryOptionCombo = datimvalidation::remapCategoryOptionCombos(categoryOptionCombo,"id","shortName")
-      ) %>%
-    dplyr::left_join(site_list, by="orgUnit") %>%
-    dplyr::left_join( mechs, by = c(  "attributeOptionCombo" = "mechanismCode" )) %>% 
-    dplyr::select(-orgUnit)
-  
-  return(d)
+      ) 
+    
+d
+
 }
   
 
 modalitySummaryChart <- function(d) {
+  
   age_order<-c(
     "<1", 
     "1-4",

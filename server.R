@@ -117,12 +117,27 @@ shinyServer(function(input, output, session) {
           return(e)
         })
       
+      
       if (!inherits(d,"error") & !is.null(d)) {
         
+        d$datim$site_data_pretty <- NULL 
+        
         incProgress(0.1, detail = ("Checking validation rules"))
+        
         d <- validateSiteData(d)
-        incProgress(0.1, detail = ("Producing download format"))
-        d <- adornSiteData(d)
+        
+        incProgress(0.1, detail = ("Processing mechanisms"))
+        
+        d <- adornMechanisms(d)
+        
+        incProgress(0.1, detail = ("Processing data element groups"))
+        
+        d <- adornDataElements(d)
+        
+        incProgress(0.1, detail = ("Finalizing download format"))
+        
+        d <- adornMetdata(d)
+        
         
         shinyjs::show("downloadFlatPack")
       }
@@ -139,7 +154,7 @@ shinyServer(function(input, output, session) {
     
     vr<-validation_results()
     
-    if (!inherits(vr,"error") & !is.null(vr)){
+    if (!inherits(vr,"error") & !is.null(vr$datim$site_data_pretty)){
       vr  %>% 
         purrr::pluck(.,"datim") %>%
         purrr::pluck(.,"site_data_pretty") %>%
@@ -153,25 +168,25 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  # output$modality_summary <- renderPlot({ 
-  #   
-  #   vr<-validation_results()
-  #   
-  #   if (!inherits(vr,"error") & !is.null(vr)){
-  #     
-  #       modalitySummaryChart(vr)
-  #     
-  #   } else {
-  #     NULL
-  #   }
-  #   
-  # },height = 400,width = 600)
+   output$modality_summary <- renderPlot({ 
+     
+     vr<-validation_results()
+     
+     if (!inherits(vr,"error") & !is.null(vr$datim$site_data_pretty)){
+       
+         modalitySummaryChart(vr)
+       
+     } else {
+       NULL
+     }
+     
+   },height = 400,width = 600)
 
   output$vr_rules <- renderDataTable({ 
     
     vr<-validation_results()
     
-    if (!inherits(vr,"error")  & !is.null(vr)){
+    if (!inherits(vr,"error")  & !is.null(vr$datim$vr_rules_check)){
       
       vr %>%
         purrr::pluck(.,"datim") %>%
