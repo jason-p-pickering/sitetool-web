@@ -2,6 +2,7 @@ require(datapackr)
 require(scales)
 options(shiny.maxRequestSize = 100 * 1024 ^ 2)
 options("baseurl" = "http://127.0.0.1:8080/")
+#options("baseurl" = "https://www.datim.org/")
 
 DHISLogin <- function(baseurl, username, password) {
   httr::set_config(httr::config(http_version = 0))
@@ -96,6 +97,7 @@ dataElementModalityMap<-function() {
 
 adornSiteData<-function(d) {
   
+
   cached_mechs <- "/srv/shiny-server/apps/sitetool/mechs.rds"
   
   if ( file.access(cached_mechs,4) == 0 ) {
@@ -148,7 +150,7 @@ modalitySummaryChart <- function(d) {
     "45-49",
     "50+")
   
-  foo<- d$datim$site_data_pretty %>% 
+  foo <- d$datim$site_data_pretty %>% 
     dplyr::filter(!is.na(hts_modality)) %>% 
     dplyr::mutate(hts_sex = ifelse(stringr::str_detect(categoryOptionCombo,"Male"),"Male","Female")) %>% 
     tidyr::separate(categoryOptionCombo,into=c("Age","Status","Sex"),sep=",") %>%
