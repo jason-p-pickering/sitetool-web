@@ -134,10 +134,13 @@ shinyServer(function(input, output, session) {
         
         d <- adornDataElements(d)
         
-        incProgress(0.1, detail = ("Finalizing download format"))
+        incProgress(0.1, detail = ("Performing dimensional transformation"))
         
         d <- adornMetdata(d)
         
+        incProgress(0.1, detail = ("Processing site information"))
+        
+        d <- adornSites(d)
         
         shinyjs::show("downloadFlatPack")
       }
