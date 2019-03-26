@@ -45,25 +45,25 @@ validateSiteData <- function(d) {
   vr_violations <- datimvalidation::validateData(vr_data,
                                                  datasets = datasets_uid,
                                                  parallel = is_parallel)
-  # rules_to_keep <- c(
-  #   "L76D9NGEPRS",
-  #   "rVVZmdG1KTb",
-  #   "zEOFo6X436M",
-  #   "oVtpQHVVeCV",
-  #   "r0CC6MQW5zc",
-  #   "vrS3kAtlJ4F",
-  #   "WB338HNucS7",
-  #   "tiagZGzSh6G",
-  #   "vkFHYHgfqCf",
-  #   "coODsuNsoXu",
-  #   "qOnTyseQXv8",
-  #   "Ry93Kc34Zwg",
-  #   "g0XwMGLB5XP",
-  #   "eb02xBNx7bD",
-  #   "SNzoIyNuanF"
-  # )
-  #
-  #vr_violations<-vr_violations[ vr_violations$id %in% rules_to_keep, ]
+   rules_to_keep <- c(
+     "L76D9NGEPRS",
+     "rVVZmdG1KTb",
+     "zEOFo6X436M",
+     "oVtpQHVVeCV",
+     "r0CC6MQW5zc",
+     "vrS3kAtlJ4F",
+     "WB338HNucS7",
+     "tiagZGzSh6G",
+     "vkFHYHgfqCf",
+     "coODsuNsoXu",
+     "qOnTyseQXv8",
+     "Ry93Kc34Zwg",
+     "g0XwMGLB5XP",
+     "eb02xBNx7bD",
+     "SNzoIyNuanF"
+   )
+  
+  vr_violations<-vr_violations[ vr_violations$id %in% rules_to_keep, ]
   
   diff <- gsub(" <= ", "/", vr_violations$formula)
   
@@ -74,8 +74,8 @@ validateSiteData <- function(d) {
   
   d$datim$vr_rules_check <- vr_violations %>% dplyr::filter(diff >= 5) %>%
     dplyr::select(name,ou_name,mech_code,formula,diff) 
-
- d
+  
+  d
   
 }
 
@@ -120,7 +120,7 @@ adornDataElements<-function(d){
     dplyr::select(dataElement = dataElements,
                   hts_modality = name ) %>%
     dplyr::mutate(hts_modality = stringr::str_remove(hts_modality,"FY19R/FY20T"))
-    
+  
   d$datim$site_data_pretty %<>%  dplyr::left_join( modality_map, by = "dataElement")
   
   d
@@ -147,15 +147,15 @@ adornSites<-function(d) {
 adornMetdata<-function(d) {
   
   d$datim$site_data_pretty %<>%
-      dplyr::mutate(
+    dplyr::mutate(
       dataElement = datimvalidation::remapDEs(dataElement,"id","shortName"),
       categoryOptionCombo = datimvalidation::remapCategoryOptionCombos(categoryOptionCombo,"id","shortName")
-      ) 
-    
-d
-
-}
+    ) 
   
+  d
+  
+}
+
 
 modalitySummaryChart <- function(d) {
   
