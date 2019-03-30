@@ -20,6 +20,79 @@ DHISLogin <- function(baseurl, username, password) {
   }
 }
 
+validateDataElementOrgunits<-function(d) {
+  
+  datasets <- c("nIHNMxuPUOR", "sBv1dj90IX6")
+  vr_data <- d$datim$site_data
+  names(vr_data) <- c("dataElement",
+                      "period",
+                      "orgUnit",
+                      "categoryOptionCombo",
+                      "attributeOptionCombo",
+                      "value")
+  
+  de_check <-
+    datimvalidation::checkDataElementOrgunitValidity(
+      data = vr_data,
+      datasets = datasets,
+      organisationUnit = d$info$datapack_uid
+    ) 
+  
+  if (inherits(de_check, "data.frame")) {
+    message<- paste0("ERROR!",NROW(de_check),
+      "invalid data element/orgunit associations found!")
+    
+    de_check %<>%
+      dplyr::select(dataElement, orgUnit) %>%
+      dplyr::distinct() %>%
+      dplyr::mutate(dataElement=datimvalidation::remapDEs(dataElement, 
+                                             mode_in = "id", 
+                                             mode_out = "shortName"),
+                    orgUnit=datimvalidation::remapOUs(orgUnit,
+                                             organisationUnit = d$info$datapack_uid,
+                                             mode_in = "id",
+                                             mode_out="shortName"))
+    
+    d$datim$dataelement_orgunit_check<-de_check
+    d$info$warningMsg<-append(message,d$info$warningMsg)
+    d$info$had_error<-TRUE
+  } 
+  d
+}
+
+validateDataElementDisaggs<-function(d){
+  #Validation rule checking
+  vr_data <- d$datim$site_data
+  names(vr_data) <- c("dataElement",
+                      "period",
+                      "orgUnit",
+                      "categoryOptionCombo",
+                      "attributeOptionCombo",
+                      "value")
+  datasets <- c("nIHNMxuPUOR", "sBv1dj90IX6")
+  
+  des_disagg_check<-datimvalidation::checkDataElementDisaggValidity(data=vr_data,
+                                                                    datasets=datasets)
+  
+  
+  if (inherits(des_disagg_check, "data.frame")) {
+    
+    d$datim$des_disagg_check<-des_disagg_check %>%
+      dplyr::select(orgUnit,dataElement) %>%
+      dplyr::distinct() %>% 
+      dplyr::mutate(dataElement=datimvalidation::remapDEs(dataElement, 
+                                                          mode_in = "id", 
+                                                          mode_out = "shortName"),
+                    categoryOptionCombo=datimvalidation::remapCategoryOptionCombos(categoryOptionCombo,mode_in = "id",mode_out = "shortName"))
+    
+    msg <- "ERROR!: Invalid data element / disagg combinations found!"
+    d$info$warningMsg<-append(msg,d$info$warningMsg)
+    d$info$had_error<-TRUE
+  }
+  
+  d
+}
+
 validateSiteData <- function(d) {
   #Validation rule checking
   vr_data <- d$datim$site_data
@@ -184,7 +257,8 @@ modalitySummaryChart <- function(d) {
     dplyr::mutate(Age=factor(as.character(Age),levels=age_order))
   
   ggplot(foo, aes(x=Age,y=value, fill=hts_sex)) + 
-    geom_bar(stat = "identity") + 
+    geom_bar(stat = "identity") +
+    scale_y_continuous(labels = scales::comma) + 
     facet_wrap(~hts_modality) + 
     theme() +
     scale_fill_manual(values = c("#548dc0", "#59BFB3")) +
