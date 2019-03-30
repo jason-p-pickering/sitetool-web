@@ -244,7 +244,8 @@ modalitySummaryChart <- function(d) {
     dplyr::mutate(Age=factor(as.character(Age),levels=age_order))
   
   ggplot(foo, aes(x=Age,y=value, fill=hts_sex)) + 
-    geom_bar(stat = "identity") + 
+    geom_bar(stat = "identity") +
+    scale_y_continuous(labels = scales::comma) + 
     facet_wrap(~hts_modality) + 
     theme() +
     scale_fill_manual(values = c("#548dc0", "#59BFB3")) +
