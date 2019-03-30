@@ -39,7 +39,7 @@ validateDataElementOrgunits<-function(d) {
     ) 
   
   if (inherits(de_check, "data.frame")) {
-    message<- paste0("ERROR!",NROW(de_check),
+    message<- paste0("ERROR! ",NROW(de_check),
       "invalid data element/orgunit associations found!")
     
     de_check %<>%
