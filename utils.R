@@ -63,7 +63,7 @@ validateDataElementDisaggs<-function(d){
                       "value")
   datasets <- c("nIHNMxuPUOR", "sBv1dj90IX6")
   
-  des_disagg_check<-datimvalidation::checkDataElementDisaggValidity(data=d,
+  des_disagg_check<-datimvalidation::checkDataElementDisaggValidity(data=vr_data,
                                                                     datasets=datasets)
   
   
