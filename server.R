@@ -126,6 +126,14 @@ shinyServer(function(input, output, session) {
         
         d <- validateSiteData(d)
         
+        incProgress(0.1, detail = ("Checking data element/ disaggregations"))
+        
+        d <-validateDataElementDisaggs(d)
+        
+        incProgress(0.1, detail = ("Checking data element/ organisation units"))
+        
+        d <- validateDataElementOrgunits(d)
+        
         incProgress(0.1, detail = ("Processing mechanisms"))
         
         d <- adornMechanisms(d)

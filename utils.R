@@ -20,6 +20,66 @@ DHISLogin <- function(baseurl, username, password) {
   }
 }
 
+validateDataElementOrgunits<-function(d) {
+  
+  datasets <- c("nIHNMxuPUOR", "sBv1dj90IX6")
+  vr_data <- d$datim$site_data
+  names(vr_data) <- c("dataElement",
+                      "period",
+                      "orgUnit",
+                      "categoryOptionCombo",
+                      "attributeOptionCombo",
+                      "value")
+  
+  de_check <-
+    datimvalidation::checkDataElementOrgunitValidity(
+      data = vr_data,
+      datasets = ds,
+      organisationUnit = d$info$datapack_uid
+    ) 
+  
+  if (inherits(de_check, "data.frame")) {
+    messages<-append(paste(
+      NROW(de_check),
+      "invalid data element/orgunit associations found!"
+    ), messages)
+    
+    d$datim$dataelement_disagg_check<-de_check
+    d$info$warningMsg<-append(messages,d$info$warningMsg)
+    d$info$had_error<-TRUE
+  } else {
+    messages<-append("Data element/orgunit associations are valid.", messages)
+  }
+  
+  d
+}
+
+validateDataElementDisaggs<-function(d){
+  #Validation rule checking
+  vr_data <- d$datim$site_data
+  names(vr_data) <- c("dataElement",
+                      "period",
+                      "orgUnit",
+                      "categoryOptionCombo",
+                      "attributeOptionCombo",
+                      "value")
+  datasets <- c("nIHNMxuPUOR", "sBv1dj90IX6")
+  
+  des_disagg_check<-datimvalidation::checkDataElementDisaggValidity(data=d,
+                                                                    datasets=datasets)
+  
+  
+  if (inherits(des_disagg_check, "data.frame")) {
+    
+    d$datim$des_disagg_check<-des_disagg_check
+    msg <- "ERROR!: Invalid data element / disagg combinations found!"
+    d$info$warningMsg<-append(msg,d$info$warningMsg)
+    d$info$had_error<-TRUE
+  }
+  
+  d
+}
+
 validateSiteData <- function(d) {
   #Validation rule checking
   vr_data <- d$datim$site_data
