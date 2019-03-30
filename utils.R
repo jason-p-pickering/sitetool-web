@@ -47,9 +47,7 @@ validateDataElementOrgunits<-function(d) {
     d$datim$dataelement_disagg_check<-de_check
     d$info$warningMsg<-append(messages,d$info$warningMsg)
     d$info$had_error<-TRUE
-  } else {
-    messages<-append("Data element/orgunit associations are valid.", messages)
-  }
+  } 
   
   d
 }
