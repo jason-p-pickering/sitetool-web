@@ -34,21 +34,29 @@ validateDataElementOrgunits<-function(d) {
   de_check <-
     datimvalidation::checkDataElementOrgunitValidity(
       data = vr_data,
-      datasets = ds,
+      datasets = datasets,
       organisationUnit = d$info$datapack_uid
     ) 
   
   if (inherits(de_check, "data.frame")) {
-    messages<-append(paste(
-      NROW(de_check),
-      "invalid data element/orgunit associations found!"
-    ), messages)
+    message<- paste0("ERROR!",NROW(de_check),
+      "invalid data element/orgunit associations found!")
     
-    d$datim$dataelement_disagg_check<-de_check
-    d$info$warningMsg<-append(messages,d$info$warningMsg)
+    de_check %<>%
+      dplyr::select(dataElement, orgUnit) %>%
+      dplyr::distinct() %>%
+      dplyr::mutate(dataElement=datimvalidation::remapDEs(dataElement, 
+                                             mode_in = "id", 
+                                             mode_out = "shortName"),
+                    orgUnit=datimvalidation::remapOUs(orgUnit,
+                                             organisationUnit = d$info$datapack_uid,
+                                             mode_in = "id",
+                                             mode_out="shortName"))
+    
+    d$datim$dataelement_orgunit_check<-de_check
+    d$info$warningMsg<-append(message,d$info$warningMsg)
     d$info$had_error<-TRUE
   } 
-  
   d
 }
 
@@ -69,7 +77,14 @@ validateDataElementDisaggs<-function(d){
   
   if (inherits(des_disagg_check, "data.frame")) {
     
-    d$datim$des_disagg_check<-des_disagg_check
+    d$datim$des_disagg_check<-des_disagg_check %>%
+      dplyr::select(orgUnit,dataElement) %>%
+      dplyr::distinct() %>% 
+      dplyr::mutate(dataElement=datimvalidation::remapDEs(dataElement, 
+                                                          mode_in = "id", 
+                                                          mode_out = "shortName"),
+                    categoryOptionCombo=datimvalidation::remapCategoryOptionCombos(categoryOptionCombo,mode_in = "id",mode_out = "shortName"))
+    
     msg <- "ERROR!: Invalid data element / disagg combinations found!"
     d$info$warningMsg<-append(msg,d$info$warningMsg)
     d$info$had_error<-TRUE
