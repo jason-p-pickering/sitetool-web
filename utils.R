@@ -22,7 +22,7 @@ DHISLogin <- function(baseurl, username, password) {
 
 validateDataElementOrgunits<-function(d) {
   
-  datasets <- c("nIHNMxuPUOR", "sBv1dj90IX6")
+  datasets <- c("nIHNMxuPUOR", "sBv1dj90IX6","C2G7IyPPrvD","HiJieecLXxN")
   vr_data <- d$datim$site_data
   names(vr_data) <- c("dataElement",
                       "period",
@@ -107,7 +107,7 @@ validateSiteData <- function(d) {
                                 getOption("organisationUnit"),
                                 "code",
                                 "id")
-  datasets_uid <- c("nIHNMxuPUOR", "sBv1dj90IX6")
+  datasets_uid <- c("nIHNMxuPUOR", "sBv1dj90IX6","C2G7IyPPrvD","HiJieecLXxN")
   if ( Sys.info()["sysname"] == "Linux") {
     ncores <- parallel::detectCores() - 1
     doMC::registerDoMC( cores = ncores )
