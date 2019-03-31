@@ -15,18 +15,22 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$file1, {
     shinyjs::enable("validate")
-    ready$ok <- FALSE
+    ready$ok <- checkIsAuthenticated()
   }) 
   
   observeEvent(input$validate, {
     shinyjs::disable("validate")
-    ready$ok <- TRUE
+    ready$ok <- checkIsAuthenticated()
   })  
   
+  observeEvent(input$login_button, {
+    is_logged_in<-FALSE
+    user_input$authenticated <-DHISLogin(input$server,input$user_name,input$password)
+  })   
   
   output$ui <- renderUI({
     
-    if (user_input$authenticated == FALSE) {
+    if (user_input$authenticated == FALSE | !ready$ok) {
       ##### UI code for login page
       fluidPage(
         fluidRow(
@@ -71,13 +75,7 @@ shinyServer(function(input, output, session) {
   }
 })
   
-  
   user_input <- reactiveValues(authenticated = FALSE, status = "")
-  
-  observeEvent(input$login_button, {
-    is_logged_in<-FALSE
-    user_input$authenticated <-DHISLogin(input$server,input$user_name,input$password)
-  })   
   
   # password entry UI componenets:
   #   username and password text fields, login button
@@ -93,7 +91,6 @@ shinyServer(function(input, output, session) {
       actionButton("login_button", "Log in!")
     ))
   })
-  
   
   validate<-function() {
     
@@ -157,9 +154,7 @@ shinyServer(function(input, output, session) {
     
   }
   
-  
   validation_results <- reactive({ validate() })
-  
   
   output$indicator_summary<-renderDataTable({
     
@@ -179,7 +174,7 @@ shinyServer(function(input, output, session) {
     }
   })
   
-   output$modality_summary <- renderPlot({ 
+  output$modality_summary <- renderPlot({ 
      
      vr<-validation_results()
      

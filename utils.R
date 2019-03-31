@@ -20,6 +20,13 @@ DHISLogin <- function(baseurl, username, password) {
   }
 }
 
+checkIsAuthenticated<-function() {
+  httr::set_config(httr::config(http_version = 0))
+  url <- URLencode(URL = paste0(getOption("baseurl"), "api/me"))
+  r <- httr::GET(url)
+  r$status == 200L
+}
+
 validateDataElementOrgunits<-function(d) {
   
   datasets <- c("nIHNMxuPUOR", "sBv1dj90IX6","C2G7IyPPrvD","HiJieecLXxN")
