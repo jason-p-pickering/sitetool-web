@@ -11,26 +11,27 @@ source("./utils.R")
 
 shinyServer(function(input, output, session) {
   
-  ready <- reactiveValues(ok = FALSE)
+  ready <- reactiveValues(ok = FALSE) 
+  
+  user_input <- reactiveValues(authenticated = FALSE, status = "")
   
   observeEvent(input$file1, {
     shinyjs::enable("validate")
-    ready$ok <- checkIsAuthenticated()
+    ready$ok <- FALSE
   }) 
   
   observeEvent(input$validate, {
     shinyjs::disable("validate")
-    ready$ok <- checkIsAuthenticated()
+    user_input$authenticated <- checkIsAuthenticated()
   })  
   
   observeEvent(input$login_button, {
-    is_logged_in<-FALSE
     user_input$authenticated <-DHISLogin(input$server,input$user_name,input$password)
   })   
   
   output$ui <- renderUI({
     
-    if (user_input$authenticated == FALSE | !ready$ok) {
+    if ( user_input$authenticated == FALSE ) {
       ##### UI code for login page
       fluidPage(
         fluidRow(
@@ -75,8 +76,6 @@ shinyServer(function(input, output, session) {
   }
 })
   
-  user_input <- reactiveValues(authenticated = FALSE, status = "")
-  
   # password entry UI componenets:
   #   username and password text fields, login button
   output$uiLogin <- renderUI({
@@ -96,7 +95,7 @@ shinyServer(function(input, output, session) {
     
     shinyjs::hide("downloadFlatPack")
     
-    if (!ready$ok) {return(NULL)}
+    if (!user_input$authenticated) {return(NULL)}
   
     inFile <- input$file1
     messages<-""
