@@ -78,12 +78,12 @@ validateDataElementDisaggs<-function(d){
   if (inherits(des_disagg_check, "data.frame")) {
     
     d$datim$des_disagg_check<-des_disagg_check %>%
-      dplyr::select(orgUnit,dataElement) %>%
+      dplyr::select(dataElement,categoryOptionCombo) %>%
       dplyr::distinct() %>% 
-      dplyr::mutate(dataElement=datimvalidation::remapDEs(dataElement, 
+      dplyr::mutate(dataElement_name=datimvalidation::remapDEs(dataElement, 
                                                           mode_in = "id", 
                                                           mode_out = "shortName"),
-                    categoryOptionCombo=datimvalidation::remapCategoryOptionCombos(categoryOptionCombo,mode_in = "id",mode_out = "shortName"))
+                    categoryOptionCombo_name=datimvalidation::remapCategoryOptionCombos(categoryOptionCombo,mode_in = "id",mode_out = "shortName"))
     
     msg <- "ERROR!: Invalid data element / disagg combinations found!"
     d$info$warningMsg<-append(msg,d$info$warningMsg)
