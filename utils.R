@@ -108,10 +108,11 @@ validateSiteData <- function(d) {
                                 "code",
                                 "id")
   datasets_uid <- c("nIHNMxuPUOR", "sBv1dj90IX6","C2G7IyPPrvD","HiJieecLXxN")
+  
   if ( Sys.info()["sysname"] == "Linux") {
     ncores <- parallel::detectCores() - 1
     doMC::registerDoMC( cores = ncores )
-    is_parallel <- TRUE
+    is_parallel <- foreach::getDoParWorkers() > 1
   } else {
     is_parallel <- FALSE
   } 
