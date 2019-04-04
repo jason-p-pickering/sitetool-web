@@ -23,7 +23,7 @@ DHISLogin <- function(baseurl, username, password) {
 validateDataElementOrgunits<-function(d) {
   
   datasets <- c("nIHNMxuPUOR", "sBv1dj90IX6","C2G7IyPPrvD","HiJieecLXxN")
-  vr_data <- d$datim$site_data
+  vr_data <- d$datim$site_data 
   names(vr_data) <- c("dataElement",
                       "period",
                       "orgUnit",
@@ -148,6 +148,13 @@ validateSiteData <- function(d) {
   
   d$datim$vr_rules_check <- vr_violations %>% dplyr::filter(diff >= 5) %>%
     dplyr::select(name,ou_name,mech_code,formula,diff) 
+  
+  if (NROW(d$datim$vr_rules_check) > 0 ) {
+    message<- paste0("ERROR! ",NROW(d$datim$vr_rules_check),
+                     "validatoin rule violations found. Check the Validation rules tab for details!")
+    d$info$warningMsg<-append(message,d$info$warningMsg)
+    d$info$had_error<-TRUE
+  }
   
   d
   
