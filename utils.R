@@ -1,8 +1,11 @@
 require(datapackr)
 require(scales)
+require(futile.logger)
+
 options(shiny.maxRequestSize = 100 * 1024 ^ 2)
 options("baseurl" = "http://127.0.0.1:8080/")
 #options("baseurl" = "https://www.datim.org/")
+flog.appender(appender.file("/var/log/sitetool.log"), name="sitetool")
 
 DHISLogin <- function(baseurl, username, password) {
   httr::set_config(httr::config(http_version = 0))
@@ -41,6 +44,7 @@ validateDataElementOrgunits<-function(d) {
   if (inherits(de_check, "data.frame")) {
     message<- paste0("ERROR! ",NROW(de_check),
       "invalid data element/orgunit associations found!")
+    flog.info(paste0(d$info$datapack_name, " SiteTool: ", message ), name="sitetool")
     
     de_check %<>%
       dplyr::select(dataElement, orgUnit) %>%
@@ -55,7 +59,7 @@ validateDataElementOrgunits<-function(d) {
     
     d$datim$dataelement_orgunit_check<-de_check
     d$info$warningMsg<-append(message,d$info$warningMsg)
-    d$info$had_error<-TRUE
+    d$info$has_error<-TRUE
   } 
   d
 }
@@ -86,6 +90,7 @@ validateDataElementDisaggs<-function(d){
                     categoryOptionCombo_name=datimvalidation::remapCategoryOptionCombos(categoryOptionCombo,mode_in = "id",mode_out = "shortName"))
     
     msg <- "ERROR!: Invalid data element / disagg combinations found!"
+    flog.info(paste0(d$info$datapack_name, " SiteTool: ", msg ), name="sitetool")
     d$info$warningMsg<-append(msg,d$info$warningMsg)
     d$info$had_error<-TRUE
   }
@@ -151,7 +156,8 @@ validateSiteData <- function(d) {
   
   if (NROW(d$datim$vr_rules_check) > 0 ) {
     message<- paste0("ERROR! ",NROW(d$datim$vr_rules_check),
-                     "validatoin rule violations found. Check the Validation rules tab for details!")
+                     "validation rule violations found. Check the Validation rules tab for details!")
+    flog.info(paste0(d$info$datapack_name, " SiteTool: ", message ), name="sitetool")
     d$info$warningMsg<-append(message,d$info$warningMsg)
     d$info$had_error<-TRUE
   }

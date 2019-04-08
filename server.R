@@ -77,6 +77,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$login_button, {
     is_logged_in<-FALSE
     user_input$authenticated <-DHISLogin(input$server,input$user_name,input$password)
+    flog.info(paste0("User ",input$user_name, " logged in."), name="sitetool")
   })   
   
   # password entry UI componenets:
@@ -119,7 +120,7 @@ shinyServer(function(input, output, session) {
       
       
       if (!inherits(d,"error") & !is.null(d)) {
-        
+        flog.info(paste0("Initiating validation of ",d$info$datapack_name, "SiteTool."), name="sitetool")
         d$datim$site_data_pretty <- NULL 
         
         incProgress(0.1, detail = ("Checking validation rules"))
@@ -151,6 +152,14 @@ shinyServer(function(input, output, session) {
         d <- adornSites(d)
         
         shinyjs::show("downloadFlatPack")
+        flog.info(paste0("Finished validation of ",d$info$datapack_name, "SiteTool."), name="sitetool")
+        if (d$info$has_error) {
+          msg<-paste(d$info$datapack_name, "SiteTool had errors.")
+        } else{
+          msg<-paste(d$info$datapack_name, "SiteTool passed with no errors.")
+        }
+        flog.info(msg, name="sitetool")
+        
       }
     })
     return(d)
@@ -223,6 +232,13 @@ shinyServer(function(input, output, session) {
       
       download_data <- validation_results() %>% 
         purrr::pluck(.,"datim")
+      
+      datapack_name <-
+        validation_results() %>% 
+        purrr::pluck(.,"info") %>%
+        purrr::pluck(.,"datapack_name")
+      
+      flog.info(paste("Flatpack requested for",datapack_name), name="sitetool")
       
       openxlsx::write.xlsx(download_data, file = file)
       
