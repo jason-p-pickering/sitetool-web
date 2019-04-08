@@ -25,7 +25,7 @@ DHISLogin <- function(baseurl, username, password) {
 
 validateDataElementOrgunits<-function(d) {
   
-  datasets <- c("nIHNMxuPUOR", "sBv1dj90IX6","C2G7IyPPrvD","HiJieecLXxN")
+  datasets <- c("nIHNMxuPUOR", "sBv1dj90IX6","C2G7IyPPrvD","sBv1dj90IX6")
   vr_data <- d$datim$site_data 
   names(vr_data) <- c("dataElement",
                       "period",
@@ -73,7 +73,7 @@ validateDataElementDisaggs<-function(d){
                       "categoryOptionCombo",
                       "attributeOptionCombo",
                       "value")
-  datasets <- c("nIHNMxuPUOR", "sBv1dj90IX6")
+  datasets <- c("nIHNMxuPUOR", "sBv1dj90IX6","C2G7IyPPrvD","sBv1dj90IX6")
   
   des_disagg_check<-datimvalidation::checkDataElementDisaggValidity(data=vr_data,
                                                                     datasets=datasets)
