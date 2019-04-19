@@ -124,7 +124,12 @@ validateSiteData <- function(d) {
   vr_violations <- datimvalidation::validateData(vr_data,
                                                  datasets = datasets_uid,
                                                  parallel = is_parallel)
-   rules_to_keep <- c(
+  if(NROW(vr_violations) == 0) { 
+    d$datim$vr_rules_check<-NULL
+    return(d)
+    }
+  
+  rules_to_keep <- c(
      "L76D9NGEPRS",
      "rVVZmdG1KTb",
      "zEOFo6X436M",
@@ -143,6 +148,11 @@ validateSiteData <- function(d) {
    )
   
   vr_violations<-vr_violations[ vr_violations$id %in% rules_to_keep, ]
+  
+  if(NROW(vr_violations) == 0) { 
+    d$datim$vr_rules_check<-NULL
+    return(d)
+  }
   
   diff <- gsub(" <= ", "/", vr_violations$formula)
   
