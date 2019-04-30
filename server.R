@@ -113,7 +113,8 @@ shinyServer(function(input, output, session) {
       
       incProgress(0.1, detail = ("Validating your SiteTool"))
       d<-tryCatch({
-        datapackr::unPackSiteToolData(inFile$datapath)},
+        datapackr::unPackTool(submission_path = inFile$datapath,
+                              tool = "Site Tool")},
         error = function(e){
           return(e)
         })

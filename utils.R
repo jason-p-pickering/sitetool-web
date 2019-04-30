@@ -38,7 +38,7 @@ validateDataElementOrgunits<-function(d) {
     datimvalidation::checkDataElementOrgunitValidity(
       data = vr_data,
       datasets = datasets,
-      organisationUnit = d$info$datapack_uid
+      organisationUnit = d$info$country_uids
     ) 
   
   if (inherits(de_check, "data.frame")) {
@@ -53,7 +53,7 @@ validateDataElementOrgunits<-function(d) {
                                              mode_in = "id", 
                                              mode_out = "shortName"),
                     orgUnit=datimvalidation::remapOUs(orgUnit,
-                                             organisationUnit = d$info$datapack_uid,
+                                             organisationUnit = d$info$country_uids,
                                              mode_in = "id",
                                              mode_out="shortName"))
     
@@ -227,7 +227,7 @@ adornDataElements<-function(d){
 
 adornSites<-function(d) {
   
-  site_list <- getSiteList(d$info$datapack_uid) %>%
+  site_list <- getSiteList(d$info$country_uids) %>%
     dplyr::select(site_name=name,
                   site_type,
                   psnu,
